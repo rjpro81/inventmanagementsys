@@ -32,6 +32,8 @@ public class ApplicationFrame extends JFrame {
     private ResultSet resultSet; 
     private JPanel loginPanel;
     private JPanel loginComponentsPanel;
+    private JPanel orderFulfillmentPanel;
+    private JTextArea orderFulfillmentTextArea;
     //customer components
     private JLabel customerNoLabel;
     private JTextField customerNoTextField;
@@ -63,6 +65,18 @@ public class ApplicationFrame extends JFrame {
     private JButton searchButton;
     private JPanel searchPanel;
     private JPanel searchComponentsPanel;
+    private JPanel itemAdjustmentPanel;
+    private JLabel itemNoLabel;
+    private JTextField itemNoTextField;
+    private JLabel itemNameLabel;
+    private JTextField itemNameTextField;
+    private JLabel itemPriceLabel;
+    private JTextField itemPriceTextField;
+    private JLabel itemCustomerLabel;
+    private JTextField itemCustomerTextField;
+    private JPanel itemButtonPanel;
+    private JButton newItemButton;
+    private JButton submitItemButton;
     //inventory activity components
     private JPanel inventoryActivityPanel;
     private JPanel inventoryActivityComponentPanel;
@@ -126,6 +140,11 @@ public class ApplicationFrame extends JFrame {
         loginPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         loginComponentsPanel = new JPanel();
         loginComponentsPanel.setLayout(new BoxLayout(loginComponentsPanel, BoxLayout.X_AXIS));
+        orderFulfillmentPanel = new JPanel();
+        orderFulfillmentTextArea = new JTextArea(12, 35);
+        JScrollPane scrollPane = new JScrollPane(orderFulfillmentTextArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createTitledBorder("Order Fulfillment"));
+        orderFulfillmentPanel.add(scrollPane);
         
         loginSubmitButton.addActionListener(
           new ActionListener(){
@@ -157,6 +176,7 @@ public class ApplicationFrame extends JFrame {
         loginComponentsPanel.add(Box.createHorizontalStrut(3));
         loginComponentsPanel.add(loginSubmitButton);
         loginPanel.add(loginComponentsPanel);
+        loginPanel.add(orderFulfillmentPanel);
         add(loginPanel);
         
     }   
@@ -272,8 +292,33 @@ public class ApplicationFrame extends JFrame {
 		searchField.setFont(f);
 		searchButton= new JButton("go");
 		searchButton.setFont(f);
-		searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		newItemButton = new JButton("New");
+		submitItemButton = new JButton("Submit");
+		searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
 		searchComponentsPanel = new JPanel();
+		itemButtonPanel = new JPanel();
+		itemNoLabel = new JLabel("Item #:");
+		itemNoTextField = new JTextField(12);
+		itemNameLabel = new JLabel("Name:");
+		itemNameTextField = new JTextField(12);
+		itemPriceLabel = new JLabel("Price:");
+		itemPriceTextField = new JTextField(12);
+		itemCustomerLabel = new JLabel("Customer:");
+		itemCustomerTextField = new JTextField(12);
+		itemButtonPanel.setLayout(new BoxLayout(itemButtonPanel, BoxLayout.X_AXIS));
+		itemAdjustmentPanel = new JPanel(new GridLayout(4, 2, 4, 4));
+		itemAdjustmentPanel.setBorder(BorderFactory.createTitledBorder("Adjustments"));
+		itemAdjustmentPanel.add(itemNoLabel);
+		itemAdjustmentPanel.add(itemNoTextField);
+		itemAdjustmentPanel.add(itemNameLabel);
+		itemAdjustmentPanel.add(itemNameTextField);
+		itemAdjustmentPanel.add(itemPriceLabel);
+		itemAdjustmentPanel.add(itemPriceTextField);
+		itemAdjustmentPanel.add(itemCustomerLabel);
+		itemAdjustmentPanel.add(itemCustomerTextField);
+		itemButtonPanel.add(newItemButton);
+		itemButtonPanel.add(Box.createHorizontalStrut(4));
+		itemButtonPanel.add(submitItemButton);
 		searchComponentsPanel.setLayout(new BoxLayout(searchComponentsPanel, BoxLayout.X_AXIS));
 		searchComponentsPanel.add(searchLabel);
 		searchComponentsPanel.add(Box.createHorizontalStrut(2));
@@ -281,6 +326,8 @@ public class ApplicationFrame extends JFrame {
 		searchComponentsPanel.add(Box.createHorizontalStrut(2));
 		searchComponentsPanel.add(searchButton);
 		searchPanel.add(searchComponentsPanel);
+		searchPanel.add(itemAdjustmentPanel);
+		searchPanel.add(itemButtonPanel);
 		add(searchPanel);
 	}
 	
