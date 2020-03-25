@@ -9,6 +9,7 @@ import java.nio.charset.*;
 import java.io.*;
 import java.time.*;
 import java.time.format.*;
+import javax.swing.text.*;
 
 /**
  * This class provides a login screen for the application.
@@ -79,19 +80,28 @@ public class ApplicationFrame extends JFrame {
     private JButton submitItemButton;
     //inventory activity components
     private JPanel inventoryActivityPanel;
-    private JPanel inventoryActivityComponentPanel;
+    private JPanel inventoryActivityTablePanel;
     private JTextArea inventoryActivityArea;
+    private JButton resetInventoryActivityButton;
+    private JButton printInventoryActivityButton;
+    private JPanel inventoryActivityButtonPanel;
     //inventory detail component
     private JPanel inventoryDetailPanel;
-    private JPanel inventoryDetailComponentPanel;
+    private JPanel inventoryDetailTablePanel;
     private JTable inventoryTable;
     private JLabel inventoryDetailLabel;
+    private JPanel inventoryDetailButtonPanel;
+    private JLabel inventoryDetailSearchLabel;
+    private JTextField searchInventoryTextField;
+    private JButton goInventorySearchButton;
+    private JButton printInventoryDetailButton;
     //invoice and billing components
     private JPanel invoiceAndBillingPanel;
-    private JPanel invoiceAndBillingComponentPanel;
-    private JTextArea invoiceAndBillingTextArea;
-    private JLabel invoiceAndBillingLabel;
+    private JPanel invoiceAndBillingTablePanel;
+    private JPanel invoiceAndBillingButtonPanel;
     private JTable invoiceTable;
+    private JButton addInvoiceButton;
+    private JButton printInvoiceButton;
 
     /**
      * This class provides the main application window a JFrame object called ApplicationFrame
@@ -339,16 +349,14 @@ public class ApplicationFrame extends JFrame {
       String s = "";
       String[] columnNames = {"Date", "Activity"};
 	  LocalDate date = LocalDate.of(2020, 03, 20);
-	  LocalTime time = LocalTime.now();
-	  LocalDateTime dateTime = LocalDateTime.of(date, time);
-	  DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
-	  String datetime = formatter.format(dateTime);
-      Object[][] tableData = new Object[20][20];
+	  DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT);
+	  String d = formatter.format(date);
+      Object[][] tableData = new Object[10][10];
       int row = 0;
       int column = 1;
       try(BufferedReader in = new BufferedReader(new FileReader(file))){
         for(;(s = in.readLine()) != null; row++){
-	      tableData[row][0] = datetime;
+	      tableData[row][0] = d;
 	      tableData[row][column] = s;
 	    }
       }
@@ -358,14 +366,19 @@ public class ApplicationFrame extends JFrame {
 	  
       JTable inventoryActivityTable = new JTable(tableData, columnNames);
 	  inventoryActivityPanel = new JPanel();
-      inventoryActivityComponentPanel = new JPanel();
-      inventoryActivityComponentPanel.setLayout(new BoxLayout(inventoryActivityComponentPanel, BoxLayout.Y_AXIS));
+	  inventoryActivityPanel.setLayout(new BoxLayout(inventoryActivityPanel, BoxLayout.Y_AXIS));
+      inventoryActivityTablePanel = new JPanel();
+      inventoryActivityButtonPanel = new JPanel();
+      inventoryActivityButtonPanel.setLayout(new BoxLayout(inventoryActivityButtonPanel, BoxLayout.X_AXIS));
+      inventoryActivityButtonPanel.add(new JButton("clear"));
+      inventoryActivityButtonPanel.add(Box.createHorizontalStrut(5));
+      inventoryActivityButtonPanel.add(new JButton("print"));
+      inventoryActivityTablePanel.setLayout(new BorderLayout());
       JScrollPane scrollPane = new JScrollPane(inventoryActivityTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-      inventoryActivityComponentPanel.add(new JLabel("Inventory Activity"));
-      inventoryActivityComponentPanel.add(scrollPane);
-      
-	  
-      inventoryActivityPanel.add(inventoryActivityComponentPanel);
+      scrollPane.setBorder(BorderFactory.createTitledBorder("Inventory Activity"));
+      inventoryActivityTablePanel.add(scrollPane, BorderLayout.CENTER);
+      inventoryActivityPanel.add(inventoryActivityTablePanel);
+      inventoryActivityPanel.add(inventoryActivityButtonPanel);
       add(inventoryActivityPanel);
 	}
 	
@@ -374,16 +387,26 @@ public class ApplicationFrame extends JFrame {
 	 */
 	private void inventoryDetailComponent() throws SQLException{
       TableModel tableModel = null;
+      inventoryDetailButtonPanel = new JPanel();
+      inventoryDetailSearchLabel = new JLabel("search:");
+      searchInventoryTextField = new JTextField(10);
+      goInventorySearchButton = new JButton("go");
+      printInventoryDetailButton = new JButton("print");
 	  inventoryDetailPanel = new JPanel();
-	  inventoryDetailComponentPanel = new JPanel();
-	  inventoryDetailComponentPanel.setLayout(new BoxLayout(inventoryDetailComponentPanel, BoxLayout.Y_AXIS));
-	  inventoryDetailLabel = new JLabel("Inventory Details"); 
+	  inventoryDetailPanel.setLayout(new BoxLayout(inventoryDetailPanel, BoxLayout.Y_AXIS));
+	  inventoryDetailTablePanel = new JPanel();
+	  inventoryDetailTablePanel.setLayout(new BorderLayout());
 	  tableModel = new ResultSetTableModel(url, "SELECT * FROM Item");
 	  inventoryTable = new JTable(tableModel);
 	  JScrollPane scrollPane = new JScrollPane(inventoryTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-	  inventoryDetailComponentPanel.add(inventoryDetailLabel);
-	  inventoryDetailComponentPanel.add(scrollPane);
-	  inventoryDetailPanel.add(inventoryDetailComponentPanel);
+	  scrollPane.setBorder(BorderFactory.createTitledBorder("Inventory Details"));
+	  inventoryDetailTablePanel.add(scrollPane);
+	  inventoryDetailButtonPanel.add(inventoryDetailSearchLabel);
+	  inventoryDetailButtonPanel.add(searchInventoryTextField);
+	  inventoryDetailButtonPanel.add(goInventorySearchButton);
+	  inventoryDetailButtonPanel.add(printInventoryDetailButton);
+	  inventoryDetailPanel.add(inventoryDetailTablePanel);
+	  inventoryDetailPanel.add(inventoryDetailButtonPanel);
 	  add(inventoryDetailPanel); 
 	}
 	
@@ -392,13 +415,21 @@ public class ApplicationFrame extends JFrame {
 	  tableModel = new ResultSetTableModel(url, "SELECT * FROM Invoice");
 	  invoiceTable = new JTable(tableModel);
 	  JScrollPane scrollPane = new JScrollPane(invoiceTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+	  scrollPane.setBorder(BorderFactory.createTitledBorder("Invoice & Billing"));
 	  invoiceAndBillingPanel = new JPanel();
-      invoiceAndBillingComponentPanel = new JPanel();
-      invoiceAndBillingComponentPanel.setLayout(new BoxLayout(invoiceAndBillingComponentPanel, BoxLayout.Y_AXIS));
-      invoiceAndBillingLabel = new JLabel("Invoice & Billing");
-      invoiceAndBillingComponentPanel.add(new JLabel("Invoice & Billing"));
-      invoiceAndBillingComponentPanel.add(scrollPane);
-      invoiceAndBillingPanel.add(invoiceAndBillingComponentPanel);
+	  invoiceAndBillingPanel.setLayout(new BoxLayout(invoiceAndBillingPanel, BoxLayout.Y_AXIS));
+      invoiceAndBillingButtonPanel = new JPanel();
+      invoiceAndBillingButtonPanel.setLayout(new BoxLayout(invoiceAndBillingButtonPanel, BoxLayout.X_AXIS));
+      addInvoiceButton = new JButton("add");
+      printInvoiceButton = new JButton("print");
+      invoiceAndBillingButtonPanel.add(addInvoiceButton);
+      invoiceAndBillingButtonPanel.add(Box.createHorizontalStrut(5));
+      invoiceAndBillingButtonPanel.add(printInvoiceButton);
+      invoiceAndBillingTablePanel = new JPanel();
+      invoiceAndBillingTablePanel.setLayout(new BorderLayout());
+      invoiceAndBillingTablePanel.add(scrollPane, BorderLayout.CENTER);
+      invoiceAndBillingPanel.add(invoiceAndBillingTablePanel);
+      invoiceAndBillingPanel.add(invoiceAndBillingButtonPanel);
       add(invoiceAndBillingPanel);	
 	}
               
