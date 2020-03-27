@@ -1,3 +1,11 @@
+DROP TABLE Orderline;
+DROP TABLE Invoice;
+DROP TABLE Order_Table;
+DROP TABLE Employee;
+DROP TABLE Item;
+DROP TABLE RFID_Reader;
+DROP TABLE SUPPLIER;
+
 
 CREATE TABLE Supplier (
   suppNo INT CONSTRAINT suppNoRequired NOT NULL,
@@ -72,13 +80,15 @@ INSERT INTO Employee (
   (57893221, 'Linda', 'Page','lpage', '98431894');
 
 CREATE TABLE Order_Table (
-  orderNo INT CONSTRAINT orderNoRequired ON NULL AS IDENTITY,
-  itemNo INT CONSTRAINT itemNoRequired NOT NULL,
-  itemQty INT CONSTRAINT itemQtyRequired NOT NULL,
-  suppNo INT CONSTRAINT suppNoRequired NOT NULL,
+  orderNo INT CONSTRAINT orderNoRequired NOT NULL,
+  orderDate DATE CONSTRAINT orderDateRequired NOT NULL,
+  empNo INT CONSTRAINT itemNoRequired NOT NULL,
+  ordShippingAddress VARCHAR (100) CONSTRAINT orderShippingAddressRequired NOT NULL,
+  ordCity VARCHAR (50) CONSTRAINT ordCityRequired NOT NULL,
+  ordState VARCHAR (12) CONSTRAINT ordStateRequired NOT NULL,
+  ordZip INT CONSTRAINT ordZipRequired NOT NULL,
   CONSTRAINT Order_TablePK PRIMARY KEY (orderNo),
-  CONSTRAINT Order_TableFK FOREIGN KEY (suppNo) REFERENCES Employee ON DELETE CASCADE
-  CONSTRAINT Order_TableFK2 FOREIGN KEY (itemNo) REFERENCES Item ON DELETE CASCADE
+  CONSTRAINT Order_TableFK FOREIGN KEY (empNo) REFERENCES Employee ON DELETE CASCADE
 );
 
 INSERT INTO Order_Table (

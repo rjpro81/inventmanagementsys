@@ -4,17 +4,17 @@
  * @author Ralph Julsaint
  */
 public class Customer {
-  private String customerNo;
+  private int customerNo;
   private String customerName;
   private String customerAddress;
   private String customerCity;
   private String customerState;
-  private String customerZip;
+  private int customerZip;
   private String customerEmail;
-  private String customerPhone;
+  private int customerPhone;
   
-  public Customer(String customerNo, String customerName, String customerAddress,
-  String customerCity, String customerState, String customerZip, String customerEmail, String customerPhone){
+  public Customer(int customerNo, String customerName, String customerAddress,
+  String customerCity, String customerState, int customerZip, String customerEmail, int customerPhone){
     this.customerNo = customerNo;
     this.customerName = customerName;
     this.customerAddress = customerAddress;
@@ -25,7 +25,7 @@ public class Customer {
     this.customerPhone = customerPhone;
   }
   
-  public void setCustomerNo(String customerNo){
+  public void setCustomerNo(int customerNo){
     this.customerNo = customerNo;
   }
   
@@ -46,7 +46,7 @@ public class Customer {
     this.customerState = customerState;
   }
   
-  public void setCustomerZip(String customerZip){
+  public void setCustomerZip(int customerZip){
     this.customerZip = customerZip;
   }
   
@@ -54,11 +54,11 @@ public class Customer {
     this.customerEmail = customerEmail;
   }
   
-  public void setCustomerPhone(String customerPhone){
+  public void setCustomerPhone(int customerPhone){
     this.customerPhone = customerPhone;
   }
   
-  public String getCustomerNo(){
+  public int getCustomerNo(){
     return customerNo;
   }
   
@@ -79,7 +79,7 @@ public class Customer {
     return customerState;
   }
   
-  public String getCustomerZip(){
+  public int getCustomerZip(){
     return customerZip;
   }
   
@@ -87,7 +87,7 @@ public class Customer {
     return customerEmail;
   }
   
-  public String getCustomerPhone(){
+  public int getCustomerPhone(){
     return customerPhone;
   }
   

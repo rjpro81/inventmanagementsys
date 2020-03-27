@@ -10,6 +10,8 @@ import java.io.*;
 import java.time.*;
 import java.time.format.*;
 import javax.swing.text.*;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * This class provides a login screen for the application.
@@ -17,6 +19,7 @@ import javax.swing.text.*;
  */
 
 public class ApplicationFrame extends JFrame {
+	int customerIndex = 0;
 	//menu components
 	
 	//login components
@@ -152,9 +155,28 @@ public class ApplicationFrame extends JFrame {
         loginComponentsPanel.setLayout(new BoxLayout(loginComponentsPanel, BoxLayout.X_AXIS));
         orderFulfillmentPanel = new JPanel();
         orderFulfillmentTextArea = new JTextArea(12, 35);
-        JScrollPane scrollPane = new JScrollPane(orderFulfillmentTextArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        JScrollPane scrollPane = new JScrollPane(orderFulfillmentTextArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setBorder(BorderFactory.createTitledBorder("Order Fulfillment"));
         orderFulfillmentPanel.add(scrollPane);
+        
+        String orderFulFillmentTxt = "";
+        try(Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()){
+		  ResultSet rs = stmt.executeQuery("SELECT * FROM Order_Table");
+		  
+		  while (rs.next()){
+			int orderNo = rs.getInt(1);
+			Date orderDate = rs.getDate(2);
+			int customerNo = rs.getInt(3);
+			
+			LocalDate date = orderDate.toLocalDate();
+			String dateAsString = date.toString();
+			orderFulFillmentTxt += String.format("Date: %s Customer: %d Order: %d%n", dateAsString, customerNo, orderNo);
+		  }
+		}
+		catch(SQLException e){
+		  System.err.println(e);	
+		}
+		orderFulfillmentTextArea.setText(orderFulFillmentTxt);
         
         loginSubmitButton.addActionListener(
           new ActionListener(){
@@ -245,32 +267,37 @@ public class ApplicationFrame extends JFrame {
         String customerAddress = null;
         String customerCity = null;
         String customerState = null;
-        String customerZip = null;
+        int customerZip = 0;
         String customerEmail = null;
         int customerPhone = 0;
         
+        List<Customer> list = new ArrayList<>();
+        
+        //a try with resources statement that add a new Customer object from the database to output data to the customer form
         try(Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()){
 	      ResultSet resultSet = stmt.executeQuery("SELECT * FROM Supplier");
-	      if(resultSet.next()){
-		    customerNo = resultSet.getInt(1);
-			customerName = resultSet.getString(2);
-			customerAddress = resultSet.getString(3);
-			customerCity = resultSet.getString(4);
-			customerState = resultSet.getString(5);
-			customerZip = resultSet.getString(6);
-			customerEmail = resultSet.getString(7);
-			customerPhone = resultSet.getInt(8); 
-		  }
+	      while(resultSet.next()){list.add(new Customer(
+		    customerNo = resultSet.getInt(1),
+			customerName = resultSet.getString(2),
+			customerAddress = resultSet.getString(3),
+			customerCity = resultSet.getString(4),
+			customerState = resultSet.getString(5),
+			customerZip = resultSet.getInt(6),
+			customerEmail = resultSet.getString(7),
+			customerPhone = resultSet.getInt(8) 
+		  ));}
 		}
-		String custNo = ""+customerNo;
-		String custPhone = ""+customerPhone;
+		
+		String custNo = ""+list.get(customerIndex).getCustomerNo();
+		String custPhone = ""+list.get(customerIndex).getCustomerPhone();
+		String custZip = ""+list.get(customerIndex).getCustomerZip();
         customerNoTextField.setText(custNo);
-        customerNameTextField.setText(customerName);
-        customerAddressTextField.setText(customerAddress);
-        customerCityTextField.setText(customerCity);
-        customerStateTextField.setText(customerState);
-        customerZipTextField.setText(customerZip);
-        customerEmailTextField.setText(customerEmail);
+        customerNameTextField.setText(list.get(customerIndex).getCustomerName());
+        customerAddressTextField.setText(list.get(customerIndex).getCustomerAddress());
+        customerCityTextField.setText(list.get(customerIndex).getCustomerCity());
+        customerStateTextField.setText(list.get(customerIndex).getCustomerState());
+        customerZipTextField.setText(custZip);
+        customerEmailTextField.setText(list.get(customerIndex).getCustomerEmail());
         customerPhoneTextField.setText(custPhone);
         
         customerScrollPanel.add(customerScrollPrevButton);
@@ -287,6 +314,60 @@ public class ApplicationFrame extends JFrame {
         customerPanel.add(customerScrollPanel);
        
         add(customerPanel);
+        
+        
+        /**
+         * This anonymous inner class provides an event handler to scroll "up" the index of customers
+         */
+        customerScrollNextButton.addActionListener(
+          new ActionListener(){
+		    @Override
+		    public void actionPerformed(ActionEvent evt){
+			  customerIndex++;
+			  if (customerIndex == list.size())
+			    customerIndex = 0;
+			    
+			  String custNo = ""+list.get(customerIndex).getCustomerNo();
+		      String custPhone = ""+list.get(customerIndex).getCustomerPhone();
+		      String custZip = ""+list.get(customerIndex).getCustomerZip();
+              customerNoTextField.setText(custNo);
+              customerNameTextField.setText(list.get(customerIndex).getCustomerName());
+              customerAddressTextField.setText(list.get(customerIndex).getCustomerAddress());
+              customerCityTextField.setText(list.get(customerIndex).getCustomerCity());
+              customerStateTextField.setText(list.get(customerIndex).getCustomerState());
+              customerZipTextField.setText(custZip);
+              customerEmailTextField.setText(list.get(customerIndex).getCustomerEmail());
+              customerPhoneTextField.setText(custPhone); 	
+		    }
+		  }
+        );
+        
+        
+        /**
+         * This anonymous inner class provides an event handler to scroll "down" the list of customers.
+         */
+        customerScrollPrevButton.addActionListener(
+          new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent evt){
+			  customerIndex--;
+			  if (customerIndex < 0)
+			    customerIndex = list.size() - 1;
+			    
+			  String custNo = ""+list.get(customerIndex).getCustomerNo();
+		      String custPhone = ""+list.get(customerIndex).getCustomerPhone();
+		      String custZip = ""+list.get(customerIndex).getCustomerZip();
+              customerNoTextField.setText(custNo);
+              customerNameTextField.setText(list.get(customerIndex).getCustomerName());
+              customerAddressTextField.setText(list.get(customerIndex).getCustomerAddress());
+              customerCityTextField.setText(list.get(customerIndex).getCustomerCity());
+              customerStateTextField.setText(list.get(customerIndex).getCustomerState());
+              customerZipTextField.setText(custZip);
+              customerEmailTextField.setText(list.get(customerIndex).getCustomerEmail());
+              customerPhoneTextField.setText(custPhone);	
+		    }  
+		  }
+        );
         	
     }
     
@@ -388,6 +469,7 @@ public class ApplicationFrame extends JFrame {
 	private void inventoryDetailComponent() throws SQLException{
       TableModel tableModel = null;
       inventoryDetailButtonPanel = new JPanel();
+      inventoryDetailButtonPanel.setLayout(new BoxLayout(inventoryDetailButtonPanel, BoxLayout.X_AXIS));
       inventoryDetailSearchLabel = new JLabel("search:");
       searchInventoryTextField = new JTextField(10);
       goInventorySearchButton = new JButton("go");
