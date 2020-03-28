@@ -155,27 +155,59 @@ public class ApplicationFrame extends JFrame {
         loginComponentsPanel.setLayout(new BoxLayout(loginComponentsPanel, BoxLayout.X_AXIS));
         orderFulfillmentPanel = new JPanel();
         orderFulfillmentTextArea = new JTextArea(12, 35);
+        orderFulfillmentTextArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(orderFulfillmentTextArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setBorder(BorderFactory.createTitledBorder("Order Fulfillment"));
         orderFulfillmentPanel.add(scrollPane);
+        
+        class OrderFulfillment{
+		  private int orderNo;
+		  private Date orderDate;
+		  private int customerNo;
+		  
+		  OrderFulfillment(int o_n, Date o_d, int c_n){
+			orderNo = o_n;
+			orderDate = o_d;
+			customerNo = c_n;  
+		  }	
+		  
+		  public int getOrderNo(){
+			return orderNo;  
+		  }
+		  
+		  public Date getOrderDate(){
+			return orderDate;  
+		  }
+		  
+		  public int getCustomerNo(){
+			return customerNo;  
+		  }
+		  
+		  @Override
+		  public String toString(){
+			return String.format("Date: %s%nCustomer#: %d%nOrder#: %d%n%n", getOrderDate().toString(), getCustomerNo(), getOrderNo());  
+		  }
+		}
+		
+		List<OrderFulfillment> list = new ArrayList<>();
         
         String orderFulFillmentTxt = "";
         try(Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()){
 		  ResultSet rs = stmt.executeQuery("SELECT * FROM Order_Table");
 		  
-		  while (rs.next()){
-			int orderNo = rs.getInt(1);
-			Date orderDate = rs.getDate(2);
-			int customerNo = rs.getInt(3);
-			
-			LocalDate date = orderDate.toLocalDate();
-			String dateAsString = date.toString();
-			orderFulFillmentTxt += String.format("Date: %s Customer: %d Order: %d%n", dateAsString, customerNo, orderNo);
-		  }
+		  while (rs.next()){list.add(new OrderFulfillment(
+			rs.getInt(1),
+			rs.getDate(2),
+			rs.getInt(3)
+		  ));}
 		}
 		catch(SQLException e){
 		  System.err.println(e);	
 		}
+		
+		for (OrderFulfillment of : list)
+		  orderFulFillmentTxt += of;
+		  
 		orderFulfillmentTextArea.setText(orderFulFillmentTxt);
         
         loginSubmitButton.addActionListener(
@@ -219,20 +251,28 @@ public class ApplicationFrame extends JFrame {
     private void customerComponent() throws SQLException{
         customerNoLabel = new JLabel("Customer #:");
         customerNoTextField = new JTextField(12);
+        customerNoTextField.setEditable(false);
         customerNameLabel = new JLabel("Customer Name:");
         customerNameTextField = new JTextField(12);
+        customerNameTextField.setEditable(false);
         customerAddressLabel = new JLabel("Customer Address:");
         customerAddressTextField = new JTextField(12);
+        customerAddressTextField.setEditable(false);
         customerCityLabel = new JLabel("Customer City:");
         customerCityTextField = new JTextField(12);
+        customerCityTextField.setEditable(false);
         customerStateLabel = new JLabel("Customer State:");
         customerStateTextField = new JTextField(12);
+        customerStateTextField.setEditable(false);
         customerZipLabel = new JLabel("Customer Zip:");
         customerZipTextField = new JTextField(12);
+        customerZipTextField.setEditable(false);
         customerEmailLabel = new JLabel("Customer Email:");
         customerEmailTextField = new JTextField(12);
+        customerEmailTextField.setEditable(false);
         customerPhoneLabel = new JLabel("Customer Phone:");
         customerPhoneTextField = new JTextField(12);
+        customerPhoneTextField.setEditable(false);
         customerScrollPrevButton = new JButton("prev");
         customerScrollNextButton = new JButton("next");
         customerIndexTextField = new JTextField(2);
@@ -244,6 +284,8 @@ public class ApplicationFrame extends JFrame {
         
         customerPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10,10));
         customerScrollPanel.setLayout(new BoxLayout(customerScrollPanel, BoxLayout.X_AXIS));
+        
+        
         
         navigatePanel.add(customerNoLabel);
         navigatePanel.add(customerNoTextField);
@@ -288,6 +330,13 @@ public class ApplicationFrame extends JFrame {
 		  ));}
 		}
 		
+		customerMaxTextField.setHorizontalAlignment(SwingConstants.CENTER);
+		customerMaxTextField.setText(""+list.size());
+		customerMaxTextField.setEditable(false);
+        customerIndexTextField.setHorizontalAlignment(SwingConstants.CENTER);
+        customerIndexTextField.setText(""+ (customerIndex + 1));
+        customerIndexTextField.setEditable(false);
+		
 		String custNo = ""+list.get(customerIndex).getCustomerNo();
 		String custPhone = ""+list.get(customerIndex).getCustomerPhone();
 		String custZip = ""+list.get(customerIndex).getCustomerZip();
@@ -326,7 +375,8 @@ public class ApplicationFrame extends JFrame {
 			  customerIndex++;
 			  if (customerIndex == list.size())
 			    customerIndex = 0;
-			    
+			  
+			  customerIndexTextField.setText(""+ (customerIndex + 1)); 
 			  String custNo = ""+list.get(customerIndex).getCustomerNo();
 		      String custPhone = ""+list.get(customerIndex).getCustomerPhone();
 		      String custZip = ""+list.get(customerIndex).getCustomerZip();
@@ -353,7 +403,8 @@ public class ApplicationFrame extends JFrame {
 			  customerIndex--;
 			  if (customerIndex < 0)
 			    customerIndex = list.size() - 1;
-			    
+			  
+			  customerIndexTextField.setText(""+ (customerIndex + 1)); 
 			  String custNo = ""+list.get(customerIndex).getCustomerNo();
 		      String custPhone = ""+list.get(customerIndex).getCustomerPhone();
 		      String custZip = ""+list.get(customerIndex).getCustomerZip();
