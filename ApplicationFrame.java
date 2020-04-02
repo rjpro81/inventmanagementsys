@@ -28,7 +28,7 @@ public class ApplicationFrame extends JFrame {
     private JLabel passwordLabel;
     private JButton registrationButton;
     private JTextField usernameTextField;
-    private JTextField passwordTextField;
+    private JPasswordField passwordTextField;
     private DatabaseManager databaseManager;
     private Connection connection;
     private final String url = "jdbc:derby:inventory_management";
@@ -69,6 +69,7 @@ public class ApplicationFrame extends JFrame {
     private JButton searchButton;
     private JPanel searchPanel;
     private JPanel searchComponentsPanel;
+    private JPanel searchFieldPanel;
     private JPanel itemAdjustmentPanel;
     private JLabel itemNoLabel;
     private JTextField itemNoTextField;
@@ -76,6 +77,8 @@ public class ApplicationFrame extends JFrame {
     private JTextField itemNameTextField;
     private JLabel itemPriceLabel;
     private JTextField itemPriceTextField;
+    private JLabel itemQtyLabel;
+    private JTextField itemQtyTextField;
     private JLabel itemCustomerLabel;
     private JTextField itemCustomerTextField;
     private JPanel itemButtonPanel;
@@ -84,14 +87,17 @@ public class ApplicationFrame extends JFrame {
     //inventory activity components
     private JPanel inventoryActivityPanel;
     private JPanel inventoryActivityTablePanel;
-    private JTextArea inventoryActivityArea;
-    private JButton resetInventoryActivityButton;
-    private JButton printInventoryActivityButton;
+    private JTable inventoryActivityTable;
+    private Object[][] tableData;
+    static DefaultTableModel inventoryActivityTableModel;
+    private JButton inventoryActivityAddButton;
+    private JButton inventoryActivityClearButton;
     private JPanel inventoryActivityButtonPanel;
     //inventory detail component
     private JPanel inventoryDetailPanel;
     private JPanel inventoryDetailTablePanel;
-    private JTable inventoryTable;
+    private AbstractTableModel inventoryDetailTableModel;
+    private JTable inventoryDetailTable;
     private JLabel inventoryDetailLabel;
     private JPanel inventoryDetailButtonPanel;
     private JLabel inventoryDetailSearchLabel;
@@ -104,7 +110,7 @@ public class ApplicationFrame extends JFrame {
     private JPanel invoiceAndBillingButtonPanel;
     private JTable invoiceTable;
     private JButton addInvoiceButton;
-    private JButton printInvoiceButton;
+    private JButton clearInvoiceButton;
 
     /**
      * This class provides the main application window a JFrame object called ApplicationFrame
@@ -145,10 +151,10 @@ public class ApplicationFrame extends JFrame {
         passwordLabel = new JLabel("password: ");
         passwordLabel.setFont(f);
         usernameTextField = new JTextField(8);
-        passwordTextField = new JTextField(8);
-        loginSubmitButton = new JButton("Login");
+        passwordTextField = new JPasswordField(8);
+        loginSubmitButton = new JButton("login");
         loginSubmitButton.setFont(f);
-        registrationButton = new JButton("New User");
+        registrationButton = new JButton("new user");
         registrationButton.setFont(f);
         loginPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         loginComponentsPanel = new JPanel();
@@ -387,7 +393,7 @@ public class ApplicationFrame extends JFrame {
               customerStateTextField.setText(list.get(customerIndex).getCustomerState());
               customerZipTextField.setText(custZip);
               customerEmailTextField.setText(list.get(customerIndex).getCustomerEmail());
-              customerPhoneTextField.setText(custPhone); 	
+              customerPhoneTextField.setText(custPhone); 
 		    }
 		  }
         );
@@ -434,10 +440,13 @@ public class ApplicationFrame extends JFrame {
 		searchField.setFont(f);
 		searchButton= new JButton("go");
 		searchButton.setFont(f);
-		newItemButton = new JButton("New");
-		submitItemButton = new JButton("Submit");
-		searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
+		newItemButton = new JButton("new");
+		submitItemButton = new JButton("submit");
+		searchPanel = new JPanel();
+		searchPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		searchComponentsPanel = new JPanel();
+		searchComponentsPanel.setLayout(new BoxLayout(searchComponentsPanel, BoxLayout.Y_AXIS));
+		searchFieldPanel = new JPanel();
 		itemButtonPanel = new JPanel();
 		itemNoLabel = new JLabel("Item #:");
 		itemNoTextField = new JTextField(12);
@@ -445,10 +454,12 @@ public class ApplicationFrame extends JFrame {
 		itemNameTextField = new JTextField(12);
 		itemPriceLabel = new JLabel("Price:");
 		itemPriceTextField = new JTextField(12);
+		itemQtyLabel = new JLabel("QTY:");
+		itemQtyTextField = new JTextField(12);
 		itemCustomerLabel = new JLabel("Customer:");
 		itemCustomerTextField = new JTextField(12);
 		itemButtonPanel.setLayout(new BoxLayout(itemButtonPanel, BoxLayout.X_AXIS));
-		itemAdjustmentPanel = new JPanel(new GridLayout(4, 2, 4, 4));
+		itemAdjustmentPanel = new JPanel(new GridLayout(5, 2, 4, 4));
 		itemAdjustmentPanel.setBorder(BorderFactory.createTitledBorder("Adjustments"));
 		itemAdjustmentPanel.add(itemNoLabel);
 		itemAdjustmentPanel.add(itemNoTextField);
@@ -456,20 +467,22 @@ public class ApplicationFrame extends JFrame {
 		itemAdjustmentPanel.add(itemNameTextField);
 		itemAdjustmentPanel.add(itemPriceLabel);
 		itemAdjustmentPanel.add(itemPriceTextField);
+		itemAdjustmentPanel.add(itemQtyLabel);
+		itemAdjustmentPanel.add(itemQtyTextField);
 		itemAdjustmentPanel.add(itemCustomerLabel);
 		itemAdjustmentPanel.add(itemCustomerTextField);
 		itemButtonPanel.add(newItemButton);
 		itemButtonPanel.add(Box.createHorizontalStrut(4));
 		itemButtonPanel.add(submitItemButton);
-		searchComponentsPanel.setLayout(new BoxLayout(searchComponentsPanel, BoxLayout.X_AXIS));
-		searchComponentsPanel.add(searchLabel);
-		searchComponentsPanel.add(Box.createHorizontalStrut(2));
-		searchComponentsPanel.add(searchField);
-		searchComponentsPanel.add(Box.createHorizontalStrut(2));
-		searchComponentsPanel.add(searchButton);
+		searchFieldPanel.setLayout(new BoxLayout(searchFieldPanel, BoxLayout.X_AXIS));
+		searchFieldPanel.add(searchLabel);
+		searchFieldPanel.add(Box.createHorizontalStrut(2));
+		searchFieldPanel.add(searchField);
+		searchFieldPanel.add(searchButton);
+		searchComponentsPanel.add(searchFieldPanel);
+		searchComponentsPanel.add(itemAdjustmentPanel);
+		searchComponentsPanel.add(itemButtonPanel);
 		searchPanel.add(searchComponentsPanel);
-		searchPanel.add(itemAdjustmentPanel);
-		searchPanel.add(itemButtonPanel);
 		add(searchPanel);
 	}
 	
@@ -478,33 +491,52 @@ public class ApplicationFrame extends JFrame {
 	 */
 	private void inventoryActivityComponent(){
 	  File file = new File("inventory_activity.txt");
-      String s = "";
-      String[] columnNames = {"Date", "Activity"};
-	  LocalDate date = LocalDate.of(2020, 03, 20);
-	  DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT);
-	  String d = formatter.format(date);
-      Object[][] tableData = new Object[10][10];
-      int row = 0;
+      String s = null;
+      String[] columnNames = {"Activities"};
+     
+      tableData = new Object[0][0];
       int column = 1;
+      int row = 0;
+      List<String> list = new ArrayList<>();
       try(BufferedReader in = new BufferedReader(new FileReader(file))){
-        for(;(s = in.readLine()) != null; row++){
-	      tableData[row][0] = d;
-	      tableData[row][column] = s;
+		if ((s = in.readLine()) != null){
+		  row = 1;
+		  list.add(s);
+          while((s = in.readLine()) != null){
+			++row;
+	        tableData = new Object[row][column];
+	        list.add(s);
+	      }
+	     
+	      row = 0;
+	      column = 0;
+	      for (String line : list){
+		    tableData[row][column] = line;
+		    row++;
+	      }
+	  
 	    }
       }
       catch(IOException e){
 		System.err.println(e);  
 	  }
 	  
-      JTable inventoryActivityTable = new JTable(tableData, columnNames);
+	  inventoryActivityTableModel = new DefaultTableModel(tableData, columnNames);
+	  
+	  Font f = new Font("Dialog", Font.PLAIN, 10);
+      inventoryActivityTable = new JTable(inventoryActivityTableModel);
 	  inventoryActivityPanel = new JPanel();
 	  inventoryActivityPanel.setLayout(new BoxLayout(inventoryActivityPanel, BoxLayout.Y_AXIS));
       inventoryActivityTablePanel = new JPanel();
       inventoryActivityButtonPanel = new JPanel();
       inventoryActivityButtonPanel.setLayout(new BoxLayout(inventoryActivityButtonPanel, BoxLayout.X_AXIS));
-      inventoryActivityButtonPanel.add(new JButton("clear"));
+      inventoryActivityAddButton = new JButton("add");
+      inventoryActivityAddButton.setFont(f);
+      inventoryActivityClearButton = new JButton("clear");
+      inventoryActivityClearButton.setFont(f);
+      inventoryActivityButtonPanel.add(inventoryActivityAddButton);
       inventoryActivityButtonPanel.add(Box.createHorizontalStrut(5));
-      inventoryActivityButtonPanel.add(new JButton("print"));
+      inventoryActivityButtonPanel.add(inventoryActivityClearButton);
       inventoryActivityTablePanel.setLayout(new BorderLayout());
       JScrollPane scrollPane = new JScrollPane(inventoryActivityTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
       scrollPane.setBorder(BorderFactory.createTitledBorder("Inventory Activity"));
@@ -512,38 +544,138 @@ public class ApplicationFrame extends JFrame {
       inventoryActivityPanel.add(inventoryActivityTablePanel);
       inventoryActivityPanel.add(inventoryActivityButtonPanel);
       add(inventoryActivityPanel);
+      
+      inventoryActivityAddButton.addActionListener(
+        new ActionListener(){
+		  @Override
+		  public void actionPerformed(ActionEvent evt){
+		    AddActivityFrame frame = new AddActivityFrame();
+		    frame.setLocationRelativeTo(null);
+		    frame.setVisible(true);
+		    frame.setResizable(false);
+		    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		    frame.setSize(300, 150);
+		  }  
+		}
+      );
+      
+      inventoryActivityClearButton.addActionListener(
+        new ActionListener(){
+		  @Override
+		  public void actionPerformed(ActionEvent evt){
+			int option = JOptionPane.showConfirmDialog(null, "Are you sure?", "Confirm", JOptionPane.OK_CANCEL_OPTION);
+			if (option == 0){
+			  File file = new File("inventory_activity.txt");
+			  try(BufferedWriter out = new BufferedWriter(new FileWriter(file))){
+				int totalRows = inventoryActivityTableModel.getRowCount();
+				for (int i = totalRows - 1; i >= 0; i--)
+				  inventoryActivityTableModel.removeRow(i);
+				String clear = "";
+				out.write(clear, 0, clear.length());
+			  } 
+			  catch(IOException e){
+			    System.err.println(e);	
+		      } 
+		    }
+		  }	
+		}
+      );
 	}
 	
 	/**
 	 * This method provides information on items and current inventory status.
 	 */
 	private void inventoryDetailComponent() throws SQLException{
-      TableModel tableModel = null;
+	  Font f = new Font("Dialog", Font.PLAIN, 10);
       inventoryDetailButtonPanel = new JPanel();
       inventoryDetailButtonPanel.setLayout(new BoxLayout(inventoryDetailButtonPanel, BoxLayout.X_AXIS));
       inventoryDetailSearchLabel = new JLabel("search:");
-      searchInventoryTextField = new JTextField(10);
+      inventoryDetailSearchLabel.setFont(f);
+      searchInventoryTextField = new JTextField(6);
+      searchInventoryTextField.setFont(f);
       goInventorySearchButton = new JButton("go");
+      goInventorySearchButton.setFont(f);
       printInventoryDetailButton = new JButton("print");
+      printInventoryDetailButton.setFont(f);
 	  inventoryDetailPanel = new JPanel();
 	  inventoryDetailPanel.setLayout(new BoxLayout(inventoryDetailPanel, BoxLayout.Y_AXIS));
 	  inventoryDetailTablePanel = new JPanel();
 	  inventoryDetailTablePanel.setLayout(new BorderLayout());
-	  tableModel = new ResultSetTableModel(url, "SELECT * FROM Item");
-	  inventoryTable = new JTable(tableModel);
-	  JScrollPane scrollPane = new JScrollPane(inventoryTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+	  inventoryDetailTableModel = new ResultSetTableModel(url, "SELECT * FROM Item");
+	  inventoryDetailTable = new JTable(inventoryDetailTableModel);
+	  JScrollPane scrollPane = new JScrollPane(inventoryDetailTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 	  scrollPane.setBorder(BorderFactory.createTitledBorder("Inventory Details"));
 	  inventoryDetailTablePanel.add(scrollPane);
 	  inventoryDetailButtonPanel.add(inventoryDetailSearchLabel);
 	  inventoryDetailButtonPanel.add(searchInventoryTextField);
 	  inventoryDetailButtonPanel.add(goInventorySearchButton);
+	  inventoryDetailButtonPanel.add(Box.createHorizontalStrut(5));
 	  inventoryDetailButtonPanel.add(printInventoryDetailButton);
 	  inventoryDetailPanel.add(inventoryDetailTablePanel);
 	  inventoryDetailPanel.add(inventoryDetailButtonPanel);
 	  add(inventoryDetailPanel); 
+	  
+	  searchInventoryTextField.addKeyListener(
+	    new KeyAdapter(){
+		  @Override
+		  public void keyPressed(KeyEvent evt){
+			if (evt.getKeyCode() == KeyEvent.VK_ENTER)  
+			  if (!(searchInventoryTextField.getText().equals(""))){	
+		      try{
+				String itemName = searchInventoryTextField.getText();
+				String query = "SELECT * FROM Item Where itemName='"+itemName+"'";
+			    inventoryDetailTableModel = new ResultSetTableModel(url, query);
+			    inventoryDetailTable.setModel(inventoryDetailTableModel);
+			    searchInventoryTextField.setText("");
+			  }
+			  catch(SQLException e){
+				System.err.println(e);  
+			  }
+		    } else {
+			  try{
+			    inventoryDetailTableModel = new ResultSetTableModel(url, "SELECT * FROM Item");
+	            inventoryDetailTable.setModel(inventoryDetailTableModel);
+	          }
+	          catch(SQLException e){
+				System.err.println(e);  
+			  }
+			}
+		  }	
+	    }
+	  );
+	  
+	  
+	  goInventorySearchButton.addActionListener(
+	    new ActionListener(){
+		  @Override
+		  public void actionPerformed(ActionEvent evt){
+			if (!(searchInventoryTextField.getText().equals(""))){	
+		      try{
+				String itemName = searchInventoryTextField.getText();
+				String query = "SELECT * FROM Item Where itemName='"+itemName+"'";
+			    inventoryDetailTableModel = new ResultSetTableModel(url, query);
+			    inventoryDetailTable.setModel(inventoryDetailTableModel);
+			    searchInventoryTextField.setText("");
+			  }
+			  catch(SQLException e){
+				System.err.println(e);  
+			  }
+		    } else {
+			  try{
+			    inventoryDetailTableModel = new ResultSetTableModel(url, "SELECT * FROM Item");
+	            inventoryDetailTable.setModel(inventoryDetailTableModel);
+	          }
+	          catch(SQLException e){
+				System.err.println(e);  
+			  }
+			}     
+		  }	
+		}
+	  );
 	}
 	
 	private void invoiceAndBillingComponent() throws SQLException{
+	  Font f = new Font("Dialog", Font.PLAIN, 10);
 	  TableModel tableModel = null;
 	  tableModel = new ResultSetTableModel(url, "SELECT * FROM Invoice");
 	  invoiceTable = new JTable(tableModel);
@@ -554,10 +686,12 @@ public class ApplicationFrame extends JFrame {
       invoiceAndBillingButtonPanel = new JPanel();
       invoiceAndBillingButtonPanel.setLayout(new BoxLayout(invoiceAndBillingButtonPanel, BoxLayout.X_AXIS));
       addInvoiceButton = new JButton("add");
-      printInvoiceButton = new JButton("print");
+      addInvoiceButton.setFont(f);
+      clearInvoiceButton = new JButton("clear");
+      clearInvoiceButton.setFont(f);
       invoiceAndBillingButtonPanel.add(addInvoiceButton);
       invoiceAndBillingButtonPanel.add(Box.createHorizontalStrut(5));
-      invoiceAndBillingButtonPanel.add(printInvoiceButton);
+      invoiceAndBillingButtonPanel.add(clearInvoiceButton);
       invoiceAndBillingTablePanel = new JPanel();
       invoiceAndBillingTablePanel.setLayout(new BorderLayout());
       invoiceAndBillingTablePanel.add(scrollPane, BorderLayout.CENTER);
@@ -570,11 +704,14 @@ public class ApplicationFrame extends JFrame {
 	  try{
 	    connection = DriverManager.getConnection(url);
 	    String inputUserName = usernameTextField.getText();
-	    String inputUserPassword = passwordTextField.getText();
+	    char[] inputUserPassword = passwordTextField.getPassword();
+	    String userPasswordStr = "";
+	    for (char c : inputUserPassword)
+	      userPasswordStr += c;
 	    authenticateLogin = connection.prepareStatement(
 	    "SELECT * FROM User WHERE userName=? AND userPassword=?");
 	    authenticateLogin.setString(1, inputUserName);
-	    authenticateLogin.setString(2, inputUserPassword);
+	    authenticateLogin.setString(2, userPasswordStr);
 	    
 	    resultSet = authenticateLogin.executeQuery();
 	    
@@ -624,6 +761,6 @@ public class ApplicationFrame extends JFrame {
         addCustomerFrame.setResizable(false);
         addCustomerFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	
 	}
-              
+	         
 }
 

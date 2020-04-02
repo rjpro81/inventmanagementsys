@@ -115,10 +115,10 @@ public class AddCustomerFrame extends javax.swing.JFrame {
 	      if (result > 0){
 		   JOptionPane.showMessageDialog(null, "New Customer Added", "Success", JOptionPane.PLAIN_MESSAGE);
 		   this.dispose();	
-		   AppView appView = new AppView();
-		   appView.setVisible(true);
-		   appView.setResizable(false);
-		   appView.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		   //AppView appView = new AppView();
+		   //appView.setVisible(true);
+		   //appView.setResizable(false);
+		   //appView.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	      } 
 	       else{
              JOptionPane.showMessageDialog(null, "Invalid", "Invalid", JOptionPane.PLAIN_MESSAGE);	

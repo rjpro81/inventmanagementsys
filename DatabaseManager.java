@@ -190,8 +190,8 @@ public class DatabaseManager {
 	return results;
   }
   
-  public List<Supplier> getAllSuppliers(){
-    List<Supplier> results = null;
+  public List<Customer> getAllSuppliers(){
+    List<Customer> results = null;
     ResultSet resultSet = null;
     
     try{
@@ -199,15 +199,15 @@ public class DatabaseManager {
       results = new ArrayList<>();
       
       while (resultSet.next()){
-        results.add(new Supplier(
-        resultSet.getString("suppNo"),
-        resultSet.getString("suppName"),
-        resultSet.getString("suppAddress"),
-        resultSet.getString("suppCity"),
-        resultSet.getString("suppState"),
-        resultSet.getString("suppZip"),
-        resultSet.getString("suppEmail"),
-        resultSet.getString("suppPhone")));
+        results.add(new Customer(
+        resultSet.getInt("customerNo"),
+        resultSet.getString("customerName"),
+        resultSet.getString("customerAddress"),
+        resultSet.getString("customerCity"),
+        resultSet.getString("customerState"),
+        resultSet.getInt("customerZip"),
+        resultSet.getString("customerEmail"),
+        resultSet.getInt("customerPhone")));
       }
     }
     catch (SQLException sqlException){
