@@ -108,7 +108,8 @@ public class ApplicationFrame extends JFrame {
     private JPanel invoiceAndBillingPanel;
     private JPanel invoiceAndBillingTablePanel;
     private JPanel invoiceAndBillingButtonPanel;
-    private JTable invoiceTable;
+    private TableModel invoiceAndBillingTableModel;
+    static JTable invoiceTable;
     private JButton addInvoiceButton;
     private JButton clearInvoiceButton;
 
@@ -441,7 +442,7 @@ public class ApplicationFrame extends JFrame {
 		searchButton= new JButton("go");
 		searchButton.setFont(f);
 		newItemButton = new JButton("new");
-		submitItemButton = new JButton("submit");
+		submitItemButton = new JButton("update");
 		searchPanel = new JPanel();
 		searchPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		searchComponentsPanel = new JPanel();
@@ -484,6 +485,100 @@ public class ApplicationFrame extends JFrame {
 		searchComponentsPanel.add(itemButtonPanel);
 		searchPanel.add(searchComponentsPanel);
 		add(searchPanel);
+		
+		searchField.addKeyListener(
+		  new KeyAdapter(){
+			@Override
+			public void keyPressed(KeyEvent evt){
+			  if (evt.getKeyCode() == KeyEvent.VK_ENTER){
+			    String itemEntered = searchField.getText();
+			    if(!itemEntered.equals("")){
+				  try(Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()){
+			        String query = "SELECT itemNo, itemName, itemPrice, itemQOH, suppNo FROM Item WHERE itemName='"+itemEntered+"'";
+			        ResultSet rs = stmt.executeQuery(query);
+			        String itemNo = null;
+			        String itemName = null;
+			        String itemPrice = null;
+			        String itemQOH = null;
+			        String customerNo = null;
+			        if (rs.next()){
+					  itemNo = rs.getString("itemNo");
+					  itemName = rs.getString("itemName");
+					  itemPrice = rs.getString("itemPrice");
+					  itemQOH = rs.getString("itemQOH");
+					  customerNo = rs.getString("suppNo");	
+					} else {
+					  searchField.setText("");
+					  itemNoTextField.setText("");
+					  itemNameTextField.setText("");
+					  itemPriceTextField.setText("");
+					  itemQtyTextField.setText("");
+					  customerNoTextField.setText("");
+					  JOptionPane.showMessageDialog(null, "No record exists for item entered");	  
+					} 
+					searchField.setText("");
+					itemNoTextField.setText(itemNo);
+					itemNameTextField.setText(itemName);
+					itemPriceTextField.setText(itemPrice);
+					itemQtyTextField.setText(itemQOH);
+					customerNoTextField.setText(customerNo);
+				  }
+				  catch(SQLException e){
+					System.err.println(e);  
+				  }	
+				} else {
+				  JOptionPane.showMessageDialog(null, "You entered an invalid item");	
+				}
+			  }	
+		    }  
+		  }
+		);
+		
+		searchButton.addActionListener(
+		  new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent evt){
+			  String itemEntered = searchField.getText();
+			  if (!itemEntered.equals("")){
+				try(Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()){
+				  String query = "SELECT itemNo, itemName, itemPrice, itemQOH, suppNo FROM Item WHERE itemName='"+itemEntered+"'";
+				  ResultSet rs = stmt.executeQuery(query);
+				  String itemNo = null;
+			        String itemName = null;
+			        String itemPrice = null;
+			        String itemQOH = null;
+			        String customerNo = null;
+				  if(rs.next()){
+				    itemNo = rs.getString("itemNo");
+					itemName = rs.getString("itemName");
+					itemPrice = rs.getString("itemPrice");
+					itemQOH = rs.getString("itemQOH");
+					customerNo = rs.getString("suppNo");  
+				  } else {
+					searchField.setText("");
+				    itemNoTextField.setText("");
+					itemNameTextField.setText("");
+					itemPriceTextField.setText("");
+					itemQtyTextField.setText("");
+					customerNoTextField.setText("");
+					JOptionPane.showMessageDialog(null, "No record exists for item entered");  
+				  }
+				  searchField.setText("");
+				  itemNoTextField.setText(itemNo);
+			      itemNameTextField.setText(itemName);
+				  itemPriceTextField.setText(itemPrice);
+				  itemQtyTextField.setText(itemQOH);
+				  customerNoTextField.setText(customerNo);
+				} 
+				catch(SQLException e){
+				  System.err.println(e);	
+				} 
+			  } else {
+			    JOptionPane.showMessageDialog(null, "You entered an invalid item");  
+			  }	
+			}  
+		  }
+		);
 	}
 	
 	/**
@@ -676,9 +771,8 @@ public class ApplicationFrame extends JFrame {
 	
 	private void invoiceAndBillingComponent() throws SQLException{
 	  Font f = new Font("Dialog", Font.PLAIN, 10);
-	  TableModel tableModel = null;
-	  tableModel = new ResultSetTableModel(url, "SELECT * FROM Invoice");
-	  invoiceTable = new JTable(tableModel);
+	  invoiceAndBillingTableModel = new ResultSetTableModel(url, "SELECT * FROM Invoice");
+	  invoiceTable = new JTable(invoiceAndBillingTableModel);
 	  JScrollPane scrollPane = new JScrollPane(invoiceTable, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 	  scrollPane.setBorder(BorderFactory.createTitledBorder("Invoice & Billing"));
 	  invoiceAndBillingPanel = new JPanel();
@@ -698,6 +792,21 @@ public class ApplicationFrame extends JFrame {
       invoiceAndBillingPanel.add(invoiceAndBillingTablePanel);
       invoiceAndBillingPanel.add(invoiceAndBillingButtonPanel);
       add(invoiceAndBillingPanel);	
+      
+      addInvoiceButton.addActionListener(
+        new ActionListener(){
+		  @Override
+		  public void actionPerformed(ActionEvent evt){
+		    AddInvoiceAndBillingFrame frame = new AddInvoiceAndBillingFrame();
+		    frame.setLocationRelativeTo(null);
+		    frame.setVisible(true);
+		    frame.setSize(300, 150);
+		    frame.setResizable(false);
+		    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		  }	
+		}
+      );
+      
 	}
               
     private void loginSubmitButtonActionPerformed(ActionEvent evt){
