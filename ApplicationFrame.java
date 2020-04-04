@@ -97,7 +97,7 @@ public class ApplicationFrame extends JFrame {
     private JPanel inventoryDetailPanel;
     private JPanel inventoryDetailTablePanel;
     private AbstractTableModel inventoryDetailTableModel;
-    private JTable inventoryDetailTable;
+    static JTable inventoryDetailTable;
     private JLabel inventoryDetailLabel;
     private JPanel inventoryDetailButtonPanel;
     private JLabel inventoryDetailSearchLabel;
@@ -451,8 +451,10 @@ public class ApplicationFrame extends JFrame {
 		itemButtonPanel = new JPanel();
 		itemNoLabel = new JLabel("Item #:");
 		itemNoTextField = new JTextField(12);
+		itemNoTextField.setEditable(false);
 		itemNameLabel = new JLabel("Name:");
 		itemNameTextField = new JTextField(12);
+		itemNameTextField.setEditable(false);
 		itemPriceLabel = new JLabel("Price:");
 		itemPriceTextField = new JTextField(12);
 		itemQtyLabel = new JLabel("QTY:");
@@ -513,7 +515,7 @@ public class ApplicationFrame extends JFrame {
 					  itemNameTextField.setText("");
 					  itemPriceTextField.setText("");
 					  itemQtyTextField.setText("");
-					  customerNoTextField.setText("");
+					  itemCustomerTextField.setText("");
 					  JOptionPane.showMessageDialog(null, "No record exists for item entered");	  
 					} 
 					searchField.setText("");
@@ -521,7 +523,7 @@ public class ApplicationFrame extends JFrame {
 					itemNameTextField.setText(itemName);
 					itemPriceTextField.setText(itemPrice);
 					itemQtyTextField.setText(itemQOH);
-					customerNoTextField.setText(customerNo);
+					itemCustomerTextField.setText(customerNo);
 				  }
 				  catch(SQLException e){
 					System.err.println(e);  
@@ -560,7 +562,7 @@ public class ApplicationFrame extends JFrame {
 					itemNameTextField.setText("");
 					itemPriceTextField.setText("");
 					itemQtyTextField.setText("");
-					customerNoTextField.setText("");
+					itemCustomerTextField.setText("");
 					JOptionPane.showMessageDialog(null, "No record exists for item entered");  
 				  }
 				  searchField.setText("");
@@ -568,7 +570,7 @@ public class ApplicationFrame extends JFrame {
 			      itemNameTextField.setText(itemName);
 				  itemPriceTextField.setText(itemPrice);
 				  itemQtyTextField.setText(itemQOH);
-				  customerNoTextField.setText(customerNo);
+				  itemCustomerTextField.setText(customerNo);
 				} 
 				catch(SQLException e){
 				  System.err.println(e);	
@@ -576,6 +578,20 @@ public class ApplicationFrame extends JFrame {
 			  } else {
 			    JOptionPane.showMessageDialog(null, "You entered an invalid item");  
 			  }	
+			}  
+		  }
+		);
+		
+		newItemButton.addActionListener(
+		  new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent evt){
+			  AddItemFrame frame = new AddItemFrame();
+			  frame.setLocationRelativeTo(null);
+			  frame.setSize(300, 200);
+			  frame.setVisible(true);
+			  frame.setResizable(false);
+			  frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			}  
 		  }
 		);
@@ -803,6 +819,32 @@ public class ApplicationFrame extends JFrame {
 		    frame.setSize(300, 150);
 		    frame.setResizable(false);
 		    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		  }	
+		}
+      );
+      
+      clearInvoiceButton.addActionListener(
+        new ActionListener(){
+		  @Override
+		  public void actionPerformed(ActionEvent evt){
+		    int option = JOptionPane.showConfirmDialog(null, "Warning: this will delete all invoices", "Confirm", JOptionPane.OK_CANCEL_OPTION); 
+		    if (option == 0){
+			  try(Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()){
+			    String deleteStatement = "DELETE FROM Invoice";
+			    int result = stmt.executeUpdate(deleteStatement);
+			    
+			    if (result > 0){
+				  JOptionPane.showMessageDialog(null, "All records deleted");	
+				  invoiceTable.setModel(new ResultSetTableModel(url, "SELECT * FROM Invoice"));
+				} else {
+				  JOptionPane.showMessageDialog(null, "No records deleted");	
+				}
+				
+			  }
+			  catch(SQLException e){
+				System.err.println(e);  
+			  }	
+			} 
 		  }	
 		}
       );
