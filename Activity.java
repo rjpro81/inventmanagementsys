@@ -31,6 +31,6 @@ abstract class Activity{
   
   @Override
   public String toString(){
-    return String.format("%s -- received on %s%n", getActivity(), getDate().toString());
+    return String.format("%s -- on %s%n", getActivity(), getDate().toString());
   }
 }

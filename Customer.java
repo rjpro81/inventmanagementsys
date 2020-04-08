@@ -91,5 +91,9 @@ public class Customer {
     return customerPhone;
   }
   
+  @Override
+  public String toString(){
+	return String.format("%s", getCustomerName());  
+  }
   
 }

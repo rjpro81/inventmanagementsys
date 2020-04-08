@@ -12,6 +12,7 @@ import java.time.format.*;
 import javax.swing.text.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.text.*;
 
 /**
  * This class provides a login screen for the application.
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 
 public class ApplicationFrame extends JFrame {
 	int customerIndex = 0;
+	private int comboboxCustomerNumber;
 	//menu components
 	
 	//login components
@@ -79,11 +81,15 @@ public class ApplicationFrame extends JFrame {
     private JTextField itemPriceTextField;
     private JLabel itemQtyLabel;
     private JTextField itemQtyTextField;
+    private JLabel itemExpDateLabel;
+    private JTextField itemExpDateTextField;
     private JLabel itemCustomerLabel;
     private JTextField itemCustomerTextField;
     private JPanel itemButtonPanel;
     private JButton newItemButton;
-    private JButton submitItemButton;
+    private JButton updateItemButton;
+    private JComboBox<Customer> customerList;
+    private DefaultComboBoxModel<Customer> customerComboBoxModel;
     //inventory activity components
     private JPanel inventoryActivityPanel;
     private JPanel inventoryActivityTablePanel;
@@ -442,7 +448,7 @@ public class ApplicationFrame extends JFrame {
 		searchButton= new JButton("go");
 		searchButton.setFont(f);
 		newItemButton = new JButton("new");
-		submitItemButton = new JButton("update");
+		updateItemButton = new JButton("update");
 		searchPanel = new JPanel();
 		searchPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		searchComponentsPanel = new JPanel();
@@ -459,10 +465,12 @@ public class ApplicationFrame extends JFrame {
 		itemPriceTextField = new JTextField(12);
 		itemQtyLabel = new JLabel("QTY:");
 		itemQtyTextField = new JTextField(12);
+		itemExpDateLabel = new JLabel("Expiration:");
+		itemExpDateTextField = new JTextField("mm/dd/yyyy", 12);
+		//itemExpDateTextField.setForeground(Color.LIGHT_GRAY);
 		itemCustomerLabel = new JLabel("Customer:");
-		itemCustomerTextField = new JTextField(12);
 		itemButtonPanel.setLayout(new BoxLayout(itemButtonPanel, BoxLayout.X_AXIS));
-		itemAdjustmentPanel = new JPanel(new GridLayout(5, 2, 4, 4));
+		itemAdjustmentPanel = new JPanel(new GridLayout(6, 2, 4, 4));
 		itemAdjustmentPanel.setBorder(BorderFactory.createTitledBorder("Adjustments"));
 		itemAdjustmentPanel.add(itemNoLabel);
 		itemAdjustmentPanel.add(itemNoTextField);
@@ -472,11 +480,13 @@ public class ApplicationFrame extends JFrame {
 		itemAdjustmentPanel.add(itemPriceTextField);
 		itemAdjustmentPanel.add(itemQtyLabel);
 		itemAdjustmentPanel.add(itemQtyTextField);
+		itemAdjustmentPanel.add(itemExpDateLabel);
+		itemAdjustmentPanel.add(itemExpDateTextField);
 		itemAdjustmentPanel.add(itemCustomerLabel);
-		itemAdjustmentPanel.add(itemCustomerTextField);
+		itemAdjustmentPanel.add(getCustomerList());
 		itemButtonPanel.add(newItemButton);
 		itemButtonPanel.add(Box.createHorizontalStrut(4));
-		itemButtonPanel.add(submitItemButton);
+		itemButtonPanel.add(updateItemButton);
 		searchFieldPanel.setLayout(new BoxLayout(searchFieldPanel, BoxLayout.X_AXIS));
 		searchFieldPanel.add(searchLabel);
 		searchFieldPanel.add(Box.createHorizontalStrut(2));
@@ -496,18 +506,20 @@ public class ApplicationFrame extends JFrame {
 			    String itemEntered = searchField.getText();
 			    if(!itemEntered.equals("")){
 				  try(Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()){
-			        String query = "SELECT itemNo, itemName, itemPrice, itemQOH, suppNo FROM Item WHERE itemName='"+itemEntered+"'";
+			        String query = "SELECT itemNo, itemName, itemPrice, itemQOH, itemExpDate, suppNo FROM Item WHERE itemName='"+itemEntered+"'";
 			        ResultSet rs = stmt.executeQuery(query);
 			        String itemNo = null;
 			        String itemName = null;
 			        String itemPrice = null;
 			        String itemQOH = null;
+			        String itemExpDate = null;
 			        String customerNo = null;
 			        if (rs.next()){
 					  itemNo = rs.getString("itemNo");
 					  itemName = rs.getString("itemName");
 					  itemPrice = rs.getString("itemPrice");
 					  itemQOH = rs.getString("itemQOH");
+					  itemExpDate = rs.getString("itemExpDate");
 					  customerNo = rs.getString("suppNo");	
 					} else {
 					  searchField.setText("");
@@ -515,7 +527,7 @@ public class ApplicationFrame extends JFrame {
 					  itemNameTextField.setText("");
 					  itemPriceTextField.setText("");
 					  itemQtyTextField.setText("");
-					  itemCustomerTextField.setText("");
+					  itemExpDateTextField.setText("mm/dd/yyyy");
 					  JOptionPane.showMessageDialog(null, "No record exists for item entered");	  
 					} 
 					searchField.setText("");
@@ -523,7 +535,7 @@ public class ApplicationFrame extends JFrame {
 					itemNameTextField.setText(itemName);
 					itemPriceTextField.setText(itemPrice);
 					itemQtyTextField.setText(itemQOH);
-					itemCustomerTextField.setText(customerNo);
+					itemExpDateTextField.setText(itemExpDate);
 				  }
 				  catch(SQLException e){
 					System.err.println(e);  
@@ -543,18 +555,20 @@ public class ApplicationFrame extends JFrame {
 			  String itemEntered = searchField.getText();
 			  if (!itemEntered.equals("")){
 				try(Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()){
-				  String query = "SELECT itemNo, itemName, itemPrice, itemQOH, suppNo FROM Item WHERE itemName='"+itemEntered+"'";
+				  String query = "SELECT itemNo, itemName, itemPrice, itemQOH, itemExpDate, suppNo FROM Item WHERE itemName='"+itemEntered+"'";
 				  ResultSet rs = stmt.executeQuery(query);
 				  String itemNo = null;
 			        String itemName = null;
 			        String itemPrice = null;
 			        String itemQOH = null;
+			        String itemExpDate = null;
 			        String customerNo = null;
 				  if(rs.next()){
 				    itemNo = rs.getString("itemNo");
 					itemName = rs.getString("itemName");
 					itemPrice = rs.getString("itemPrice");
 					itemQOH = rs.getString("itemQOH");
+					itemExpDate = rs.getString("itemExpDate");
 					customerNo = rs.getString("suppNo");  
 				  } else {
 					searchField.setText("");
@@ -562,7 +576,7 @@ public class ApplicationFrame extends JFrame {
 					itemNameTextField.setText("");
 					itemPriceTextField.setText("");
 					itemQtyTextField.setText("");
-					itemCustomerTextField.setText("");
+					itemExpDateTextField.setText("mm/dd/yyyy");
 					JOptionPane.showMessageDialog(null, "No record exists for item entered");  
 				  }
 				  searchField.setText("");
@@ -570,7 +584,7 @@ public class ApplicationFrame extends JFrame {
 			      itemNameTextField.setText(itemName);
 				  itemPriceTextField.setText(itemPrice);
 				  itemQtyTextField.setText(itemQOH);
-				  itemCustomerTextField.setText(customerNo);
+				  itemExpDateTextField.setText(itemExpDate);
 				} 
 				catch(SQLException e){
 				  System.err.println(e);	
@@ -581,7 +595,7 @@ public class ApplicationFrame extends JFrame {
 			}  
 		  }
 		);
-		
+	
 		newItemButton.addActionListener(
 		  new ActionListener(){
 			@Override
@@ -592,6 +606,51 @@ public class ApplicationFrame extends JFrame {
 			  frame.setVisible(true);
 			  frame.setResizable(false);
 			  frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			}  
+		  }
+		);
+		
+		updateItemButton.addActionListener(
+		  new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent evt){
+			  int option = JOptionPane.showConfirmDialog(null, "Are you sure?", "Confirm", JOptionPane.OK_CANCEL_OPTION);
+			  if (option == 0){
+				int itemNo = Integer.parseInt(itemNoTextField.getText());
+				double itemPrice = Double.parseDouble(itemPriceTextField.getText());
+				int itemQOH = Integer.parseInt(itemQtyTextField.getText());
+				SimpleDateFormat f = new SimpleDateFormat("MM/dd/yyyy");
+				java.util.Date d = null;
+				try{
+				  d = (java.util.Date) f.parse(itemExpDateTextField.getText());
+				}
+				catch(ParseException e){
+				  System.err.println(e);	
+				}
+				long dateAsLong = d.getTime();
+				java.sql.Date expDate = new java.sql.Date(dateAsLong);
+				
+				int customerNo = getCustomerNoFromName(customerList.getSelectedItem());
+				try(Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()){
+			      String updateStatement = "UPDATE Item SET itemPrice ="+itemPrice+", itemQOH ="+itemQOH+", itemExpDate='"+expDate+"', suppNo ="+customerNo+" WHERE itemNo ="+itemNo;
+			      int result = stmt.executeUpdate(updateStatement);
+			      itemNoTextField.setText("");
+			      itemNameTextField.setText("");
+			      itemPriceTextField.setText("");
+			      itemQtyTextField.setText("");
+			      itemExpDateTextField.setText("");
+			      
+			      if (result > 0){
+				    JOptionPane.showMessageDialog(null, "Record is updated");
+				    inventoryDetailTable.setModel(new ResultSetTableModel(url, "SELECT * FROM Item"));
+				  } else {
+					JOptionPane.showMessageDialog(null, "Record was not updated");  
+				  }
+				} 
+				catch(SQLException e){
+				  System.err.println(e);	
+				}
+			  }	
 			}  
 		  }
 		);
@@ -816,7 +875,7 @@ public class ApplicationFrame extends JFrame {
 		    AddInvoiceAndBillingFrame frame = new AddInvoiceAndBillingFrame();
 		    frame.setLocationRelativeTo(null);
 		    frame.setVisible(true);
-		    frame.setSize(300, 150);
+		    frame.setSize(350, 150);
 		    frame.setResizable(false);
 		    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		  }	
@@ -911,6 +970,57 @@ public class ApplicationFrame extends JFrame {
 	    addCustomerFrame.setVisible(true);
         addCustomerFrame.setResizable(false);
         addCustomerFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);	
+	}
+	
+	private JComboBox<Customer> getCustomerList(){
+	  customerList = null;
+	  customerComboBoxModel = new DefaultComboBoxModel<>();
+	  try(Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement();){
+        String query = "SELECT * FROM Supplier";
+        
+        ResultSet rs = stmt.executeQuery(query);
+        
+        while(rs.next()){
+		  customerComboBoxModel.addElement(new Customer(rs.getInt("suppNo"), rs.getString("suppName"), rs.getString("suppAddress"), rs.getString("suppCity"), rs.getString("suppState"), rs.getInt("suppZip"), rs.getString("suppEmail"), rs.getInt("suppPhone")));	
+		}
+		
+	  }
+	  catch(SQLException e){
+		System.err.println(e);  
+	  }	
+	  customerList = new JComboBox<>(customerComboBoxModel);
+	  customerList.setMaximumRowCount(5);
+	  return customerList;
+	}
+	
+	private JComboBox<String> getStatesList(){
+	  JComboBox<String> statesComboBox = null;
+	  String[] statesList = {"Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", 
+		  "Florida", "Georgia", "Hawaii", "Idaho", "illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", 
+		  "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", 
+		  "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", 
+		  "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", 
+		  "Washington", "West Virginia", "Wisconsin", "Wyoming"};
+	  DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>(statesList);
+	  statesComboBox = new JComboBox<>(model);
+	  statesComboBox.setMaximumRowCount(5);
+	  return statesComboBox;
+	}
+	
+	private int getCustomerNoFromName(Object customerName){
+	  int customerNo = 0;
+	  try(Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()){
+	    String query = "SELECT suppNo FROM Supplier WHERE suppName='"+customerName.toString()+"'";
+	    ResultSet rs = stmt.executeQuery(query);
+	    System.out.println(customerName.toString());
+	    if (rs.next()){
+		  customerNo = rs.getInt("suppNo");	
+		}
+	  }
+	  catch(SQLException e){
+		System.err.println(e);  
+	  }	
+	  return customerNo;
 	}
 	         
 }
