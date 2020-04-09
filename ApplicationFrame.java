@@ -467,7 +467,6 @@ public class ApplicationFrame extends JFrame {
 		itemQtyTextField = new JTextField(12);
 		itemExpDateLabel = new JLabel("Expiration:");
 		itemExpDateTextField = new JTextField("mm/dd/yyyy", 12);
-		//itemExpDateTextField.setForeground(Color.LIGHT_GRAY);
 		itemCustomerLabel = new JLabel("Customer:");
 		itemButtonPanel.setLayout(new BoxLayout(itemButtonPanel, BoxLayout.X_AXIS));
 		itemAdjustmentPanel = new JPanel(new GridLayout(6, 2, 4, 4));
@@ -669,23 +668,22 @@ public class ApplicationFrame extends JFrame {
       int row = 0;
       List<String> list = new ArrayList<>();
       try(BufferedReader in = new BufferedReader(new FileReader(file))){
-		if ((s = in.readLine()) != null){
-		  row = 1;
-		  list.add(s);
-          while((s = in.readLine()) != null){
-			++row;
-	        tableData = new Object[row][column];
-	        list.add(s);
-	      }
-	     
-	      row = 0;
-	      column = 0;
-	      for (String line : list){
-		    tableData[row][column] = line;
-		    row++;
-	      }
-	  
+		while ((s = in.readLine()) != null){
+		  ++row;
+	    }   
+	  }
+	  catch(IOException e){
+		System.err.println(e);  
+	  } 
+	  try(BufferedReader in = new BufferedReader(new FileReader(file))){
+	    tableData = new Object[row][column];
+	    int columnIndex = 0;
+		int rowIndex = 0;
+	    while ((s = in.readLine()) != null){
+		  tableData[rowIndex][columnIndex] = s;
+	      rowIndex++;
 	    }
+	    
       }
       catch(IOException e){
 		System.err.println(e);  
@@ -919,7 +917,7 @@ public class ApplicationFrame extends JFrame {
 	    for (char c : inputUserPassword)
 	      userPasswordStr += c;
 	    authenticateLogin = connection.prepareStatement(
-	    "SELECT * FROM User WHERE userName=? AND userPassword=?");
+	    "SELECT * FROM App_User WHERE userName=? AND userPassword=?");
 	    authenticateLogin.setString(1, inputUserName);
 	    authenticateLogin.setString(2, userPasswordStr);
 	    
@@ -927,13 +925,6 @@ public class ApplicationFrame extends JFrame {
 	    
 	    if (resultSet.next()){
 		  JOptionPane.showMessageDialog(null, "Login successful", "Success", JOptionPane.PLAIN_MESSAGE);
-		  this.dispose();	
-		  /*
-		  AppFrame appFrame = new AppFrame();
-		  appFrame.setVisible(true);
-		  appFrame.setResizable(false);
-		  appFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		  */
 		}
 		else
 		  JOptionPane.showMessageDialog(null, "Invalid Username or Password", "Invalid", JOptionPane.PLAIN_MESSAGE);
@@ -947,8 +938,8 @@ public class ApplicationFrame extends JFrame {
 		try {
 		  resultSet.close();	
 	    }  
-	    catch (SQLException sqlException){
-		  sqlException.printStackTrace();	
+	    catch (SQLException e){
+		  System.err.println(e);	
 	    }
 	  }
 	        

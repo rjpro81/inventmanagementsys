@@ -170,7 +170,7 @@ class AddInvoiceAndBillingFrame extends JFrame{
 	}  
 	File file = new File("inventory_activity.txt");
 	
-	try(BufferedWriter out = new BufferedWriter(new FileWriter(file))){
+	try(BufferedWriter out = new BufferedWriter(new FileWriter(file, true))){
 	  AddInvoiceActivity addInvoice = new AddInvoiceActivity(activity, date);
 	  out.write(addInvoice.toString(), 0, addInvoice.toString().length());	
 	  Object[] rowData = {addInvoice};
