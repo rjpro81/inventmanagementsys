@@ -1,9 +1,6 @@
+package com.ralph.inventmanagementsys;
 
-/**
- * This class provides a definition of Customer objects for our application.
- * @author Ralph Julsaint
- */
-public class Customer {
+class Customer {
   private int customerNo;
   private String customerName;
   private String customerAddress;
@@ -12,9 +9,13 @@ public class Customer {
   private int customerZip;
   private String customerEmail;
   private int customerPhone;
-  
-  public Customer(int customerNo, String customerName, String customerAddress,
-  String customerCity, String customerState, int customerZip, String customerEmail, int customerPhone){
+	 
+  Customer(){
+
+  }
+ 
+  Customer(int customerNo, String customerName, String customerAddress,
+    String customerCity, String customerState, int customerZip, String customerEmail, int customerPhone){
     this.customerNo = customerNo;
     this.customerName = customerName;
     this.customerAddress = customerAddress;
@@ -24,76 +25,78 @@ public class Customer {
     this.customerEmail = customerEmail;
     this.customerPhone = customerPhone;
   }
-  
-  public void setCustomerNo(int customerNo){
+	  
+  void setCustomerNo(int customerNo){
     this.customerNo = customerNo;
   }
-  
-  public void setCustomerName(String customerName){
+	  
+  void setCustomerName(String customerName){
     this.customerName = customerName;
   }
-  
-  public void setCustomerAddress(String customerAddress){
+	  
+  void setCustomerAddress(String customerAddress){
     this.customerAddress = customerAddress;
   }
-  
-  
-  public void setCustomerCity(String customerCity){
+	  
+	  
+  void setCustomerCity(String customerCity){
     this.customerCity = customerCity;
   }
-  
-  public void setCustomerState(String customerState){
+	  
+  void setCustomerState(String customerState){
     this.customerState = customerState;
   }
-  
-  public void setCustomerZip(int customerZip){
+	  
+  void setCustomerZip(int customerZip){
     this.customerZip = customerZip;
   }
-  
-  public void setCustomerEmail(String customerEmail){
+	  
+  void setCustomerEmail(String customerEmail){
     this.customerEmail = customerEmail;
   }
-  
-  public void setCustomerPhone(int customerPhone){
+	  
+  void setCustomerPhone(int customerPhone){
     this.customerPhone = customerPhone;
   }
-  
-  public int getCustomerNo(){
+	  
+  int getCustomerNo(){
     return customerNo;
   }
-  
-  public String getCustomerName(){
+	  
+  String getCustomerName(){
     return customerName;
   }
-  
-  public String getCustomerAddress(){
+	  
+  String getCustomerAddress(){
     return customerAddress;
   }
-  
-  
-  public String getCustomerCity(){
+	  
+  String getCustomerCity(){
     return customerCity;
   }
-  
-  public String getCustomerState(){
+	  
+  String getCustomerState(){
     return customerState;
   }
-  
-  public int getCustomerZip(){
+	  
+  int getCustomerZip(){
     return customerZip;
   }
-  
-  public String getCustomerEmail(){
+	  
+  String getCustomerEmail(){
     return customerEmail;
   }
-  
-  public int getCustomerPhone(){
+	  
+  int getCustomerPhone(){
     return customerPhone;
   }
-  
+	  
   @Override
   public String toString(){
-	return String.format("%s", getCustomerName());  
+    return String.format("%s", getCustomerName());  
   }
-  
+
+  Customer getObj(){
+    return this;
+  }
 }

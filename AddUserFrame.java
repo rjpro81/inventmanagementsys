@@ -1,17 +1,15 @@
+package com.ralph.inventmanagementsys;
+
 import javax.swing.*;
 import java.awt.*;
-import javax.swing.event.*;
 import java.awt.event.*;
 import java.sql.*;
 import java.util.*;
 import java.time.*;
 import java.io.*;
 
-    /**
-     * This class creates new form AddUserAccountView
-     */
-
-public class AddUserFrame extends JFrame {
+@SuppressWarnings("serial")
+class AddUserFrame extends JFrame {
 	private JButton submitButton;
 	private JButton cancelButton;
     private JLabel userNoLabel;
@@ -31,7 +29,7 @@ public class AddUserFrame extends JFrame {
     private JPasswordField passwordField;
     private JPasswordField verifyPasswordField;
     private Connection connection;
-    private final String url = "jdbc:derby:inventory_management;create=false";
+    private final String url = "jdbc:derby:inventory_management";
     private PreparedStatement insertNewUser;
     private JPanel userPanel;
     private JPanel userComponentsPanel;
@@ -123,12 +121,23 @@ public class AddUserFrame extends JFrame {
     }
             
     private void submitButtonActionPerformed(ActionEvent evt){
-		int result = 0;
+	   int result = 0;
+	   String pass = "";
+	   String verifyPass = "";
+	   char[] passArray = passwordField.getPassword();
+	   char[] verifyPassArray = verifyPasswordField.getPassword();
+	   
+	   for (char p : passArray)
+		   pass += p;
+	   
+	   for (char vp : verifyPassArray)
+		   verifyPass += vp;
+		   
 	   try{
 	     connection = DriverManager.getConnection(url);
 	     insertNewUser = connection.prepareStatement("INSERT INTO App_User (userNo, userFirstName, userLastName, userEmail, userPhone, userName, userPassword) VALUES (?, ?, ?, ?, ?, ?, ?)");
 	     
-	     if (!verifyPasswordField.getText().equals(passwordField.getText())){
+	     if (!verifyPass.equals(pass)){
 		   JOptionPane.showMessageDialog(null, "Password confirmation did not match", "Invalid", JOptionPane.PLAIN_MESSAGE);
 		   userNoTextField.setText("");
 		   firstnameTextField.setText("");
@@ -145,7 +154,7 @@ public class AddUserFrame extends JFrame {
 	     insertNewUser.setString(4, emailTextField.getText());
 	     insertNewUser.setString(5, phoneTextField.getText());
 	     insertNewUser.setString(6, usernameTextField.getText());
-	     insertNewUser.setString(7, passwordField.getText());
+	     insertNewUser.setString(7, pass);
 	     
 	     result = insertNewUser.executeUpdate();
 	     
@@ -197,5 +206,5 @@ public class AddUserFrame extends JFrame {
 	  catch(IOException e){
 		System.err.println(e);  
 	  }
-    }                           
+    }
 }

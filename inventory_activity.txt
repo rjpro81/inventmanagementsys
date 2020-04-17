@@ -1,5 +1,5 @@
-228 qty to be packed
-6 pkgs to be shipped
-10 pkgs to be delivered
-474 qty to be invoiced
-2 qty ordered for $46.92
+Invoice#: 598771099 added -- on 2020-04-09
+Invoice#: 199260133 added -- on 2020-04-09
+User#: 22862 added -- on 2020-04-09
+Item#: 9630789 added -- on 2020-04-09
+Item#: 9960612 added -- on 2020-04-10

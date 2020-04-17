@@ -1,8 +1,10 @@
+package com.ralph.inventmanagementsys;
 
 /**
  * This class provides user objects for the application.
  * @author Ralph Julsaint
  */
+
 class User {
   private int userNo;
   private String userFirstName;
@@ -11,11 +13,15 @@ class User {
   private int userPhone;
   private String userName;
   private String userPassword;
-  
-  User(final int userNo, final String userFirstName, final String userLastName, String userEmail, String userName, String userPassword){
-	this(userNo, userFirstName, userLastName, userEmail, 0, userName, userPassword);  
+
+  User(){
+
   }
-  
+	  
+  User(final int userNo, final String userFirstName, final String userLastName, String userEmail, String userName, String userPassword){
+    this(userNo, userFirstName, userLastName, userEmail, 0, userName, userPassword);  
+  }
+	  
   User(final int userNo, final String userFirstName, final String userLastName, String userEmail, int userPhone, String userName, String userPassword){
     this.userNo = userNo;
     this.userFirstName = userFirstName;
@@ -31,15 +37,15 @@ class User {
   void setUserEmail(String userEmail){
     this.userEmail = userEmail;
   }
-  
+	  
   void setUserPhone(int userPhone){
     this.userPhone = userPhone;
   }
-  
+	  
   void setUserName(String userName){
-	this.userName = userName;  
+    this.userName = userName;  
   }
-  
+	  
   void setUserPassword(String userPassword){
     this.userPassword = userPassword;
   }
@@ -49,27 +55,27 @@ class User {
   int getUserNo(){
     return userNo;
   }
-  
+	  
   String getUserFirstName(){
     return userFirstName;
   }
-  
+	  
   String getUserLastName(){
     return userLastName;
   }
-  
+	  
   String getUserEmail(){
     return userEmail;
   }
-  
+	  
   int getUserPhone(){
-	return userPhone;  
+    return userPhone;  
   }
-  
+	  
   String getUserName(){
-	return userName;  
+    return userName;  
   }
-  
+	  
   String getUserPassword(){
     return userPassword;
   }
