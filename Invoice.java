@@ -1,73 +1,105 @@
+package com.ralph.inventmanagementsys;
+
+import java.io.Serializable;
+import java.util.Date;
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
- * This class creates invoice objects for the application.
+ * This entity class creates invoice objects for the application.
  * @author Ralph Julsaint
  */
+@Entity
+@Table(name = "INVOICE")
+@XmlRootElement
+@NamedQueries({
+    @NamedQuery(name = "Invoice.findAll", query = "SELECT i FROM Invoice i"),
+    @NamedQuery(name = "Invoice.findByInvoiceno", query = "SELECT i FROM Invoice i WHERE i.invoiceno = :invoiceno"),
+    @NamedQuery(name = "Invoice.findByInvoicedate", query = "SELECT i FROM Invoice i WHERE i.invoicedate = :invoicedate")})
+public class Invoice implements Serializable {
 
-public class Invoice {
-  private String invoiceNo;
-  private String invoiceDate;
-  private String suppNo;
-  private String orderDate;
-  private String itemNo;
-  private String orderNo;
+    private static final long serialVersionUID = 1L;
+    @Id
+    @Basic(optional = false)
+    @Column(name = "INVOICENO")
+    private Integer invoiceno;
+    @Basic(optional = false)
+    @Column(name = "INVOICEDATE")
+    @Temporal(TemporalType.DATE)
+    private Date invoicedate;
+    @JoinColumn(name = "CUSTOMERNO", referencedColumnName = "CUSTOMERNO")
+    @ManyToOne(optional = false)
+    private Customer customerno;
 
-  
-  public Invoice(String invoiceDate, String invoiceNo, String suppNo,
- String orderNo, String orderDate, String itemNo){
-	  this.invoiceNo = invoiceNo;
-	  this.suppNo = suppNo;
-	  this.invoiceDate = invoiceDate;
-	  this.orderNo = orderNo;
-	  this.orderDate = orderDate;
-	  this.itemNo = itemNo;
-  }
-  
-  public void setInvoiceNo(String invoiceNo){
-	this.invoiceNo = invoiceNo;  
-  }
-  
-  public void setInvoiceDate(String invoiceDate){
-	this.invoiceDate = invoiceDate;  
-  }
-  
-  public void setSuppNo(String suppNo){
-	this.suppNo = suppNo;  
-  }
-  
-  public void setOrderNo(String orderNo){
-	this.orderNo = orderNo;  
-  }
-  
-  public void setOrderDate(String orderDate){
-	this.orderDate = orderDate;  
-  }
-  
-  public void setItemNo(String itemNo){
-	this.itemNo = itemNo;  
-  }
-  
-  public String getInvoiceNo(){
-	return invoiceNo;  
-  }
- 
-  
-  public String getInvoiceDate(){
-	return invoiceDate;  
-  }
+    public Invoice() {
+    }
 
-  public String getSuppNo(){
-	return suppNo;  
-  }
-  
-  public String getOrderDate(){
-	return orderDate;  
-  }
-  
-  public String getOrderNo(){
-	return orderNo;  
-  }
-  
-  public String getItemNo(){
-	return itemNo;  
-  }
+    public Invoice(Integer invoiceno) {
+        this.invoiceno = invoiceno;
+    }
+
+    public Invoice(Integer invoiceno, Date invoicedate) {
+        this.invoiceno = invoiceno;
+        this.invoicedate = invoicedate;
+    }
+
+    public Integer getInvoiceno() {
+        return invoiceno;
+    }
+
+    public void setInvoiceno(Integer invoiceno) {
+        this.invoiceno = invoiceno;
+    }
+
+    public Date getInvoicedate() {
+        return invoicedate;
+    }
+
+    public void setInvoicedate(Date invoicedate) {
+        this.invoicedate = invoicedate;
+    }
+
+    public Customer getCustomerno() {
+        return customerno;
+    }
+
+    public void setCustomerno(Customer customerno) {
+        this.customerno = customerno;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+        hash += (invoiceno != null ? invoiceno.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        // TODO: Warning - this method won't work in the case the id fields are not set
+        if (!(object instanceof Invoice)) {
+            return false;
+        }
+        Invoice other = (Invoice) object;
+        if ((this.invoiceno == null && other.invoiceno != null) || (this.invoiceno != null && !this.invoiceno.equals(other.invoiceno))) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "com.ralph.inventmanagementsys.Invoice[ invoiceno=" + invoiceno + " ]";
+    }
+    
 }

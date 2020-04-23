@@ -1,17 +1,31 @@
 package com.ralph.inventmanagementsys;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.sql.*;
-import java.util.*;
-import java.time.*;
-import java.io.*;
+import java.awt.FlowLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JPasswordField;
+import javax.swing.JPanel;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.Random;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-@SuppressWarnings("serial")
-class AddUserFrame extends JFrame {
-	private JButton submitButton;
-	private JButton cancelButton;
+/**
+ * This class creates a window to add users to the database for application access.
+ * @author Ralph Julsaint
+ */
+public class AddUserFrame extends JFrame{
+    private JButton submitButton;
+    private JButton cancelButton;
     private JLabel userNoLabel;
     private JLabel firstnameLabel;
     private JLabel lastnameLabel;
@@ -29,15 +43,16 @@ class AddUserFrame extends JFrame {
     private JPasswordField passwordField;
     private JPasswordField verifyPasswordField;
     private Connection connection;
-    private final String url = "jdbc:derby:inventory_management";
+    private final String url = "jdbc:derby://localhost:1527/inventory_management";
     private PreparedStatement insertNewUser;
     private JPanel userPanel;
     private JPanel userComponentsPanel;
     private JPanel userInputPanel;
     private JPanel buttonPanel;
+    private final ApplicationContext context = new AnnotationConfigApplicationContext(InventoryConfiguration.class);
 
     public AddUserFrame() {
-		super("New User");
+	super("New User");
         initComponents();
     }
 
@@ -101,110 +116,111 @@ class AddUserFrame extends JFrame {
         userPanel.add(userComponentsPanel);
         add(userPanel);
        
-        submitButton.addActionListener(
-          new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent evt){
-			  submitButtonActionPerformed(evt);	
-		    }  
-		  }
-        );
+        submitButton.addActionListener((ActionEvent evt) -> {
+            submitButtonActionPerformed(evt);
+        });
         
-        cancelButton.addActionListener(
-          new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent evt){
-			  AddUserFrame.this.dispose();	
-			}  
-		  }
-        );
+        cancelButton.addActionListener((ActionEvent evt) -> {
+            AddUserFrame.this.dispose();
+        });
     }
             
     private void submitButtonActionPerformed(ActionEvent evt){
-	   int result = 0;
-	   String pass = "";
-	   String verifyPass = "";
-	   char[] passArray = passwordField.getPassword();
-	   char[] verifyPassArray = verifyPasswordField.getPassword();
+	int result;
+	String pass = "";
+	String verifyPass = "";
+	char[] passArray = passwordField.getPassword();
+	char[] verifyPassArray = verifyPasswordField.getPassword();
 	   
-	   for (char p : passArray)
-		   pass += p;
+	for (char p : passArray)
+	    pass += p;
 	   
-	   for (char vp : verifyPassArray)
-		   verifyPass += vp;
-		   
-	   try{
-	     connection = DriverManager.getConnection(url);
-	     insertNewUser = connection.prepareStatement("INSERT INTO App_User (userNo, userFirstName, userLastName, userEmail, userPhone, userName, userPassword) VALUES (?, ?, ?, ?, ?, ?, ?)");
+	for (char vp : verifyPassArray)
+	    verifyPass += vp;
+        
+        DatabaseManager obj = context.getBean(DatabaseManager.class);
+        PreparedStatement stmt = obj.createStatement("INSERT INTO App_User (userNo, userFirstName, userLastName, userEmail, userPhone, userName, userPassword) VALUES (?, ?, ?, ?, ?, ?, ?)");
+	try{ 
+	    if (!verifyPass.equals(pass)){
+		JOptionPane.showMessageDialog(null, "Password confirmation did not match", "Invalid", JOptionPane.PLAIN_MESSAGE);
+		userNoTextField.setText("");
+		firstnameTextField.setText("");
+                lastnameTextField.setText("");
+                emailTextField.setText("");
+                phoneTextField.setText("");
+                usernameTextField.setText("");
+                passwordField.setText("");
+                verifyPasswordField.setText("");
+	    } else {
+	        stmt.setInt(1, Integer.parseInt(userNoTextField.getText()));
+	        stmt.setString(2, firstnameTextField.getText());
+	        stmt.setString(3, lastnameTextField.getText());
+	        stmt.setString(4, emailTextField.getText());
+	        stmt.setString(5, phoneTextField.getText());
+	        stmt.setString(6, usernameTextField.getText());
+	        stmt.setString(7, pass);
 	     
-	     if (!verifyPass.equals(pass)){
-		   JOptionPane.showMessageDialog(null, "Password confirmation did not match", "Invalid", JOptionPane.PLAIN_MESSAGE);
-		   userNoTextField.setText("");
-		   firstnameTextField.setText("");
-           lastnameTextField.setText("");
-           emailTextField.setText("");
-           phoneTextField.setText("");
-           usernameTextField.setText("");
-           passwordField.setText("");
-           verifyPasswordField.setText("");
-		 } else {
-	     insertNewUser.setInt(1, Integer.parseInt(userNoTextField.getText()));
-	     insertNewUser.setString(2, firstnameTextField.getText());
-	     insertNewUser.setString(3, lastnameTextField.getText());
-	     insertNewUser.setString(4, emailTextField.getText());
-	     insertNewUser.setString(5, phoneTextField.getText());
-	     insertNewUser.setString(6, usernameTextField.getText());
-	     insertNewUser.setString(7, pass);
+	        result = insertNewUser.executeUpdate();
 	     
-	     result = insertNewUser.executeUpdate();
-	     
-	      if (result > 0){
-		   JOptionPane.showMessageDialog(null, "Registration Successful", "Success", JOptionPane.PLAIN_MESSAGE);
-		   String userNo = userNoTextField.getText();
-		   addUserActivity("User#: "+userNo+" added", LocalDate.now());
-		   userNoTextField.setText("");
-		   firstnameTextField.setText("");
-           lastnameTextField.setText("");
-           emailTextField.setText("");
-           phoneTextField.setText("");
-           usernameTextField.setText("");
-           passwordField.setText("");
-           verifyPasswordField.setText("");
-		   this.dispose();	 
-	      } 
-	       else{
-             JOptionPane.showMessageDialog(null, "Invalid", "Invalid", JOptionPane.PLAIN_MESSAGE);	
-             userNoTextField.setText("");
-             firstnameTextField.setText("");
-             lastnameTextField.setText("");
-             emailTextField.setText("");
-             phoneTextField.setText("");
-             usernameTextField.setText("");
-             passwordField.setText("");
-             verifyPasswordField.setText("");
-           }      
-	     }   
-	   }
-	   catch (SQLException sqlException){
-	     sqlException.printStackTrace();   
-	   }
+	        if (result > 0){
+		    JOptionPane.showMessageDialog(null, "Registration Successful", "Success", JOptionPane.PLAIN_MESSAGE);
+		    String userNo = userNoTextField.getText();
+		    addUserActivity("User#: "+userNo+" added", LocalDate.now());
+		    userNoTextField.setText("");
+		    firstnameTextField.setText("");
+                    lastnameTextField.setText("");
+                    emailTextField.setText("");
+                    phoneTextField.setText("");
+                    usernameTextField.setText("");
+                    passwordField.setText("");
+                    verifyPasswordField.setText("");
+		    this.dispose();	 
+	        } else {
+                    JOptionPane.showMessageDialog(null, "Invalid", "Invalid", JOptionPane.PLAIN_MESSAGE);	
+                    userNoTextField.setText("");
+                    firstnameTextField.setText("");
+                    lastnameTextField.setText("");
+                    emailTextField.setText("");
+                    phoneTextField.setText("");
+                    usernameTextField.setText("");
+                    passwordField.setText("");
+                    verifyPasswordField.setText("");
+                }      
+	   }   
+	}
+	catch (SQLException e){
+	    System.err.println(e);   
+	}
     }   
     private void addUserActivity(String a, LocalDate d){
-	  File file = new File("inventory_activity.txt");
-	  Activity userActivity = new Activity(a, d){
+	class AddUserActivity extends Activity{
+            LocalDate d;
+            AddUserActivity(String a, LocalDate d){
+                super(a);
+                this.d = d;
+            }
+            
+            LocalDate getDate(){
+                return d;
+            }
+            
 	    @Override
 	    public String toString(){
-		  return String.format("%s -- on %s%n", a, d.toString());	
-		}	 
-	  };   
+		return String.format(getActivity()+" on "+getDate());	
+	    }	 
+	}   
 	  
-	  try(BufferedWriter out = new BufferedWriter(new FileWriter(file, true))){
-	     out.write(userActivity.toString(), 0, userActivity.toString().length());
-	     Object[] rowData = {userActivity};
-	     ApplicationFrame.inventoryActivityTableModel.addRow(rowData);
-	  }
-	  catch(IOException e){
-		System.err.println(e);  
-	  }
-    }
+	AddUserActivity aua = new AddUserActivity(a, d);
+        DatabaseManager obj = context.getBean(DatabaseManager.class);
+        String addUserStatement = "INSERT INTO Activity activity VALUES (?)";
+        PreparedStatement stmt = obj.createStatement(addUserStatement);
+        try{
+            stmt.setString(1, aua.toString());
+            stmt.executeUpdate();
+            ApplicationFrame.inventoryActivityTable.setModel(new ResultSetTableModel(url, "SELECT * FROM Activity"));
+        }
+        catch(SQLException e){
+            System.err.println(e);
+        }
+    }    
 }
